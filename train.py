@@ -68,9 +68,9 @@ def pprint(msg,method=''):
         except:
             pass
         #sys.stdout.flush()
-#def sess_run(commander,data,label):
+#def sess_run(commander,Data2,label):
     #global sess, data_x, data_y
-    #return sess.run(commander, {data_x: data, data_y: label})
+    #return sess.run(commander, {data_x: Data2, data_y: label})
 
 def train_lstm(method,filename,cross_cv,tab_cross_cv,result_list_dict,evaluation_list):
     global tempstdout

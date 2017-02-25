@@ -33,7 +33,7 @@ LABELS = [
 TRAIN = "train/"
 TEST = "test/"
 
-DATA_PATH = "data/"
+DATA_PATH = "Data2/"
 DATASET_PATH = DATA_PATH + "UCI Data Dataset/"
 # Load "X" (the neural network's training and testing inputs)
 
@@ -134,7 +134,7 @@ def LSTM_RNN(_X, _weights, _biases):
 
     # Linear activation
     _X = tf.nn.relu(tf.matmul(_X, _weights['hidden']) + _biases['hidden'])
-    # Split data because rnn cell needs a list of inputs for the RNN inner loop
+    # Split Data2 because rnn cell needs a list of inputs for the RNN inner loop
     _X = tf.split(0, n_steps, _X)
     # new shape: n_steps * (batch_size, n_hidden)
 
@@ -283,7 +283,7 @@ def extract_batch_size(_train, step, batch_size):
     #print(len(_train[0][0][0]))
     #print(type(_train[0][0]))
 
-    # Function to fetch a "batch_size" amount of data from "(X|y)_train" data.
+    # Function to fetch a "batch_size" amount of Data2 from "(X|y)_train" Data2.
 
     shape = list(_train.shape)
     shape[0] = batch_size
@@ -331,7 +331,7 @@ pred = LSTM_RNN3(x, weights, biases)
 # Loss, optimizer and evaluation
 l2 = lambda_loss_amount * sum(
     tf.nn.l2_loss(tf_var) for tf_var in tf.trainable_variables()
-) # L2 loss prevents this overkill neural network to overfit the data
+) # L2 loss prevents this overkill neural network to overfit the Data2
 cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(pred, y)) + l2 # Softmax loss
 optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate).minimize(cost) # Adam Optimizer
 
@@ -349,13 +349,13 @@ sess = tf.InteractiveSession(config=tf.ConfigProto(log_device_placement=True))
 init = tf.initialize_all_variables()
 sess.run(init)
 
-# Perform Training steps with "batch_size" amount of example data at each loop
+# Perform Training steps with "batch_size" amount of example Data2 at each loop
 step = 1
 while step * batch_size <= training_iters:
     batch_xs = extract_batch_size(X_train, step, batch_size)
     batch_ys = one_hot(extract_batch_size(y_train, step, batch_size))
 
-    # Fit training using batch data
+    # Fit training using batch Data2
     _, loss, acc = sess.run(
         [optimizer, cost, accuracy],
         feed_dict={
@@ -392,7 +392,7 @@ while step * batch_size <= training_iters:
 
 print("Optimization Finished!")
 
-# Accuracy for test data
+# Accuracy for test Data2
 
 one_hot_predictions, accuracy, final_loss = sess.run(
     [pred, accuracy, cost],
