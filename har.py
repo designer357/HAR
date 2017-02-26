@@ -93,7 +93,7 @@ def loaddata():
     return X_train,y_train,X_test,y_test
 
 X_train,y_train,X_test,y_test = loaddata()
-
+X_train, y_train = loaddata.loaddata("Data","S1-ADL1.dat")
 
 
 
@@ -285,26 +285,16 @@ def LSTM_RNN_HL(_X, _weights, _biases):
 
 
 def extract_batch_size(_train, step, batch_size):
-    #print("abc")
-    #print(len(_train))
-    #print(len(_train[0]))
-    #print(len(_train[0][0]))
-    #print(len(_train[0][0][0]))
-    #print(type(_train[0][0]))
-
     # Function to fetch a "batch_size" amount of Data2 from "(X|y)_train" Data2.
 
     shape = list(_train.shape)
     shape[0] = batch_size
-    #print(shape)
     batch_s = np.empty(shape)
 
     for i in range(batch_size):
         # Loop index
         index = ((step-1)*batch_size + i) % len(_train)
         batch_s[i] = _train[index]
-        #print(_train[index].shape)
-        #batch_s.append(_train[index])
     return batch_s
 
 
