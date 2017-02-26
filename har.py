@@ -8,86 +8,95 @@ import pywt
 import numpy as np
 # Useful Constants
 # Those are separate normalised input features for the neural network
-INPUT_SIGNAL_TYPES = [
-    "body_acc_x_",
-    "body_acc_y_",
-    "body_acc_z_",
-    "body_gyro_x_",
-    "body_gyro_y_",
-    "body_gyro_z_",
-    "total_acc_x_",
-    "total_acc_y_",
-    "total_acc_z_"
-]
-# Output classes to learn how to classify
-LABELS = [
-    "WALKING",
-    "WALKING_UPSTAIRS",
-    "WALKING_DOWNSTAIRS",
-    "SITTING",
-    "STANDING",
-    "LAYING"
-] # Useful Constants
+def loaddata():
+    INPUT_SIGNAL_TYPES = [
+        "body_acc_x_",
+        "body_acc_y_",
+        "body_acc_z_",
+        "body_gyro_x_",
+        "body_gyro_y_",
+        "body_gyro_z_",
+        "total_acc_x_",
+        "total_acc_y_",
+        "total_acc_z_"
+    ]
+    # Output classes to learn how to classify
+    LABELS = [
+        "WALKING",
+        "WALKING_UPSTAIRS",
+        "WALKING_DOWNSTAIRS",
+        "SITTING",
+        "STANDING",
+        "LAYING"
+    ] # Useful Constants
 
 
-TRAIN = "train/"
-TEST = "test/"
+    TRAIN = "train/"
+    TEST = "test/"
 
-DATA_PATH = "Data2/"
-DATASET_PATH = DATA_PATH + "UCI Data Dataset/"
-# Load "X" (the neural network's training and testing inputs)
+    DATA_PATH = "Data2/"
+    DATASET_PATH = DATA_PATH + "UCI HAR Dataset/"
+    # Load "X" (the neural network's training and testing inputs)
 
-def load_X(X_signals_paths):
-    X_signals = []
+    def load_X(X_signals_paths):
+        X_signals = []
 
-    for signal_type_path in X_signals_paths:
-        file = open(signal_type_path, 'r')
-        # Read dataset from disk, dealing with text files' syntax
-        X_signals.append(
-            [np.array(serie, dtype=np.float32) for serie in [
+        for signal_type_path in X_signals_paths:
+            file = open(signal_type_path, 'r')
+            # Read dataset from disk, dealing with text files' syntax
+            X_signals.append(
+                [np.array(serie, dtype=np.float32) for serie in [
+                    row.replace('  ', ' ').strip().split(' ') for row in file
+                ]]
+            )
+            file.close()
+
+        return np.transpose(np.array(X_signals), (1, 2, 0))
+
+    X_train_signals_paths = [
+        DATASET_PATH + TRAIN + "Inertial Signals/" + signal + "train.txt" for signal in INPUT_SIGNAL_TYPES
+    ]
+    X_test_signals_paths = [
+        DATASET_PATH + TEST + "Inertial Signals/" + signal + "test.txt" for signal in INPUT_SIGNAL_TYPES
+    ]
+
+    X_train = load_X(X_train_signals_paths)
+    X_test = load_X(X_test_signals_paths)
+
+    # Load "y" (the neural network's training and testing outputs)
+
+    def load_y(y_path):
+        file = open(y_path, 'r')
+        # Read dataset from disk, dealing with text file's syntax
+        y_ = np.array(
+            [elem for elem in [
                 row.replace('  ', ' ').strip().split(' ') for row in file
-            ]]
+                ]],
+            dtype=np.int32
         )
         file.close()
 
-    return np.transpose(np.array(X_signals), (1, 2, 0))
+        # Substract 1 to each output class for friendly 0-based indexing
+        return y_ - 1
 
-X_train_signals_paths = [
-    DATASET_PATH + TRAIN + "Inertial Signals/" + signal + "train.txt" for signal in INPUT_SIGNAL_TYPES
-]
-X_test_signals_paths = [
-    DATASET_PATH + TEST + "Inertial Signals/" + signal + "test.txt" for signal in INPUT_SIGNAL_TYPES
-]
+    y_train_path = DATASET_PATH + TRAIN + "y_train.txt"
+    y_test_path = DATASET_PATH + TEST + "y_test.txt"
 
-X_train = load_X(X_train_signals_paths)
-X_test = load_X(X_test_signals_paths)
+    y_train = load_y(y_train_path)
+    y_test = load_y(y_test_path)
 
 
+    print(X_train.shape)
+    print(X_test.shape)
+    print(y_train.shape)
+    print(y_test.shape)
+    return X_train,y_train,X_test,y_test
+
+X_train,y_train,X_test,y_test = loaddata()
 
 
 
 
-# Load "y" (the neural network's training and testing outputs)
-
-def load_y(y_path):
-    file = open(y_path, 'r')
-    # Read dataset from disk, dealing with text file's syntax
-    y_ = np.array(
-        [elem for elem in [
-            row.replace('  ', ' ').strip().split(' ') for row in file
-        ]],
-        dtype=np.int32
-    )
-    file.close()
-
-    # Substract 1 to each output class for friendly 0-based indexing
-    return y_ - 1
-
-y_train_path = DATASET_PATH + TRAIN + "y_train.txt"
-y_test_path = DATASET_PATH + TEST + "y_test.txt"
-
-y_train = load_y(y_train_path)
-y_test = load_y(y_test_path)
 
 # Input Data
 
@@ -225,7 +234,7 @@ def Multi_Scale_Wavelet(trainX,trainY,level,is_multi=True,wave_type='db1'):
     final_ = np.transpose(np.array(temp),[2,0,3,1])
 
     return final_,trainX,np.array(trainY)
-def LSTM_RNN3(_X, _weights, _biases):
+def LSTM_RNN_HL(_X, _weights, _biases):
 
     data_train = tf.transpose(_X, [0, 2, 1, 3])#samples,levels,time_step,n_input
     data_train = tf.reshape(data_train,(-1,7,n_input))
@@ -308,12 +317,12 @@ def one_hot(y_):
     return np.eye(n_values)[np.array(y_, dtype=np.int32)]  # Returns FLOATS
 
 
-X_train,_,y_train = Multi_Scale_Wavelet(X_train,y_train,level=7)
-X_test,_,y_test = Multi_Scale_Wavelet(X_test,y_test,level=7)
+#X_train,_,y_train = Multi_Scale_Wavelet(X_train,y_train,level=7)
+#X_test,_,y_test = Multi_Scale_Wavelet(X_test,y_test,level=7)
 print(X_train.shape)
 print(y_train.shape)
 # Graph input/output
-x = tf.placeholder(tf.float32, [None, 7,n_steps, n_input])
+x = tf.placeholder(tf.float32, [None, n_steps, n_input])
 y = tf.placeholder(tf.float32, [None, n_classes])
 
 # Graph weights
@@ -326,7 +335,7 @@ biases = {
     'out': tf.Variable(tf.random_normal([n_classes]))
 }
 
-pred = LSTM_RNN3(x, weights, biases)
+pred = LSTM_RNN(x, weights, biases)
 
 # Loss, optimizer and evaluation
 l2 = lambda_loss_amount * sum(
@@ -408,3 +417,4 @@ test_accuracies.append(accuracy)
 print("FINAL RESULT: " + \
       "Batch Loss = {}".format(final_loss) + \
       ", Accuracy = {}".format(accuracy))
+
